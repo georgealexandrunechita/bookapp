@@ -1,0 +1,110 @@
+{% extends 'bookapp/layout.html' %}
+
+{% block content %}
+
+<h2>Estadísticas de libros</h2>
+
+<ul>
+    <li>
+        <strong>Libro con más páginas:</strong>
+        {% if max_pages_book %}
+            {{ max_pages_book.title }} ({{ max_pages_book.pages }} páginas)
+        {% else %}
+            Sin datos
+        {% endif %}
+    </li>
+    <li>
+        <strong>Libro con menos páginas:</strong>
+        {% if min_pages_book %}
+            {{ min_pages_book.title }} ({{ min_pages_book.pages }} páginas)
+        {% else %}
+            Sin datos
+        {% endif %}
+    </li>
+    <li>
+        <strong>Número medio de páginas:</strong> {{ avg_pages|floatformat:2 }}
+    </li>
+    <li>
+        <strong>Rating medio:</strong> {{ avg_rating|floatformat:2 }}
+    </li>
+</ul>
+
+<h3>Libros por status</h3>
+anvas id="statusChart" width="400" height="400"></canvas>
+
+<h3>Libros por rating</h3>
+anvas id="ratingChart" width="600" height="400"></canvas>
+
+<br>
+<a href="{% url 'book_list' %}">Volver al listado</a>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+    const statusLabels = {{ status_labels|safe }};
+    const statusCounts = {{ status_counts|safe }};
+
+    const ctxStatus = document.getElementById('statusChart').getContext('2d');
+    new Chart(ctxStatus, {
+        type: 'pie',
+        data: {
+            labels: statusLabels,
+            datasets: [{
+                data: statusCounts,
+                backgroundColor: [
+                    '#4CAF50',
+                    '#2196F3',
+                    '#FFC107',
+                    '#F44336',
+                    '#9C27B0'
+                ]
+            }]
+        },
+        options: {
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    const ratingLabels = {{ rating_labels|safe }};
+    const ratingCounts = {{ rating_counts|safe }};
+
+    const ctxRating = document.getElementById('ratingChart').getContext('2d');
+    new Chart(ctxRating, {
+        type: 'bar',
+        data: {
+            labels: ratingLabels,
+            datasets: [{
+                label: 'Número de libros',
+                data: ratingCounts,
+                backgroundColor: '#2196F3'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Rating (1-5)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock content %}
